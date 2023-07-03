@@ -1,6 +1,11 @@
 #!/bin/bash
 
+    # --network host \
 docker run \
+    --ipc=host \
+    --ulimit memlock=-1 \
+    --ulimit stack=67108864 \
+    --shm-size 10gb \
     --gpus all \
     --name nccl-test \
     --rm \
