@@ -1,0 +1,54 @@
+---
+version: '3'
+networks:
+  nccl-test:
+    driver: bridge
+services:
+  worker-0:
+    container_name: worker-0
+    image: kungfu.azurecr.io/mw-nccl-test:latest
+    command: >
+      torchrun
+      --nnode=2
+      --nproc_per_node=1
+      --node_rank=0
+      --master_addr=worker-0
+      --master_port=6000
+      /workspace/test.py
+    networks: [nccl-test]
+    devices: [/dev/infiniband]
+    expose: [6000]
+    environment: [NCCL_DEBUG=INFO]
+    ulimits:
+      memlock: -1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  worker-1:
+    container_name: worker-1
+    image: kungfu.azurecr.io/mw-nccl-test:latest
+    command: >
+      torchrun
+      --nnode=2
+      --nproc_per_node=1
+      --node_rank=1
+      --master_addr=worker-0
+      --master_port=6000
+      /workspace/test.py
+    networks: [nccl-test]
+    devices: [/dev/infiniband]
+    expose: [6000]
+    environment: [NCCL_DEBUG=INFO]
+    ulimits:
+      memlock: -1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
